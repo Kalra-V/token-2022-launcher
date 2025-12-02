@@ -29,19 +29,7 @@ pub mod token_launcher {
     //     Ok(())
     // }
 
-    pub fn mint_tokens(ctx: Context<MintTokens>) -> Result<()> {
-        // let cpi_accounts = anchor_spl::token::MintTo {
-        //     mint: ctx.accounts.mint.to_account_info(),
-        //     to: ctx.accounts.token_account.to_account_info(),
-        //     authority: ctx.accounts.mint_authority.to_account_info(),
-        // };
-        // let cpi_program = ctx.accounts.token_program.to_account_info();
-        // let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
-        // anchor_spl::token::mint_to(cpi_ctx, amount)?;
-        // Ok(())
-
-        let amount: u64 = 1 * 10u64.pow(ctx.accounts.mint.decimals as u32);
-
+    pub fn mint_tokens(ctx: Context<MintTokens>, amount: u64) -> Result<()> {
         let binding = ctx.accounts.mint.key();
         let bump = ctx.bumps.mint_authority;
 
@@ -84,16 +72,6 @@ pub mod token_launcher {
 //     pub system_program: Program<'info, System>,
 // }
 
-// #[derive(Accounts)]
-// pub struct MintTokens<'info> {
-//     #[account(mut)]
-//     pub mint: Account<'info, Mint>,
-//     #[account(mut)]
-//     pub token_account: Account<'info, TokenAccount>,
-//     pub mint_authority: Signer<'info>,
-//     pub token_program: Program<'info, Token>,
-// }
-
 #[derive(Accounts)]
 pub struct MintTokens<'info> {
     #[account(mut)]
@@ -111,7 +89,6 @@ pub struct MintTokens<'info> {
     )]
     pub user_token_account: InterfaceAccount<'info, TokenAccount>,
 
-    /// CHECK: PDA, only used as authority
     #[account(
         seeds = [b"mint_auth", mint.key().as_ref()],
         bump

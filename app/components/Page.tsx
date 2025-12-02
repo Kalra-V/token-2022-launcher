@@ -12,8 +12,8 @@ import {
 import { PROGRAM_ID } from "@/config/solana";
 
 const MINT_ADDRESS = new PublicKey(
-  "J3fgHL8MHgqXYXVmPErKZS3MEqWPQ6CsUyBxHNbuwGVv"
-);
+  "9PW5vownEEBguqy1WEcCH55vzyLb18428RdFagq7mLfe"
+); // for devnet
 
 const Page = () => {
   const { publicKey } = useWallet();
@@ -43,8 +43,10 @@ const Page = () => {
         TOKEN_2022_PROGRAM_ID
       );
 
+      const amount = new anchor.BN(1 * Math.pow(10, 9)); // for 9 decimals token
+
       const tx = await program.methods
-        .mintTokens()
+        .mintTokens(amount)
         .accounts({
           mint: mintPk,
           user: user,

@@ -17,3 +17,6 @@ wallet = "~/.config/solana/id.json"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 \"tests/**/*.ts\""
+
+[programs.devnet]
+token_launcher = "CVxtH2zsGwuGWRaC7YjbxaJ2y76pb7wUh8Z4yprVeJ9M"

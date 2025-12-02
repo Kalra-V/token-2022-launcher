@@ -14,7 +14,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white">
-      <ConnectionProvider endpoint="http://127.0.0.1:8899">
+      <ConnectionProvider endpoint="https://api.devnet.solana.com">
         <WalletProvider wallets={wallets} autoConnect>
           <WalletModalProvider>
             <Page />
