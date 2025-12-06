@@ -1,6 +1,6 @@
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { PublicKey, SystemProgram } from "@solana/web3.js";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import * as anchor from "@coral-xyz/anchor";
 import { WalletButton } from "./WalletButton";
 import { useTokenLauncher } from "@/lib/tokenLauncher";
@@ -8,8 +8,10 @@ import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   TOKEN_2022_PROGRAM_ID,
   getAssociatedTokenAddressSync,
+  getTokenMetadata,
 } from "@solana/spl-token";
 import { PROGRAM_ID } from "@/config/solana";
+import type { TokenMetadata } from "@solana/spl-token-metadata";
 
 const MINT_ADDRESS = new PublicKey(
   "9PW5vownEEBguqy1WEcCH55vzyLb18428RdFagq7mLfe"
@@ -17,9 +19,54 @@ const MINT_ADDRESS = new PublicKey(
 
 const Page = () => {
   const { publicKey } = useWallet();
+  const { connection } = useConnection();
   const { program } = useTokenLauncher();
   const [minting, setMinting] = useState(false);
   const [txHash, setTxHash] = useState<string | null>(null);
+  const [tokenMetadata, setTokenMetadata] = useState<TokenMetadata | null>(
+    null
+  );
+  const [additionalMetadata, setAdditionalMetadata] = useState<{
+    image: string;
+    description: string;
+  } | null>(null);
+
+  useEffect(() => {
+    const run = async () => {
+      if (!connection) {
+        console.log("Waiting for connection...");
+        return;
+      }
+
+      try {
+        // Fetch SPL Token-2022 metadata directly from the mint account
+        const metadata = await getTokenMetadata(
+          connection,
+          MINT_ADDRESS,
+          "confirmed",
+          TOKEN_2022_PROGRAM_ID
+        );
+
+        if (metadata) {
+          console.log("Token Metadata:", metadata);
+          setTokenMetadata(metadata);
+          const additionalMetadata = await fetch(metadata.uri)
+            .then((res) => res.json())
+            .then((data) => ({
+              image: data.image,
+              description: data.description,
+            }));
+          setAdditionalMetadata(additionalMetadata);
+        } else {
+          console.log("No metadata found for this token");
+        }
+      } catch (error) {
+        console.error("Error fetching token metadata:", error);
+      }
+    };
+
+    run();
+  }, [connection]);
 
   const mintAuthorityPda = PublicKey.findProgramAddressSync(
     [Buffer.from("mint_auth"), MINT_ADDRESS.toBuffer()],
@@ -121,6 +168,56 @@ const Page = () => {
                   Mint 1 token to your connected wallet
                 </p>
               </div>
+
+              {/* Token Metadata Display */}
+              {tokenMetadata && (
+                <div className="relative overflow-hidden rounded-xl bg-white/5 border border-white/10 p-4 backdrop-blur-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-white/10 flex items-center justify-center">
+                      {additionalMetadata?.image ? (
+                        <img
+                          src={additionalMetadata.image}
+                          alt="Token Image"
+                          className="w-full h-full object-cover rounded-lg"
+                        />
+                      ) : (
+                        <svg
+                          className="w-5 h-5 text-purple-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"
+                          />
+                        </svg>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {tokenMetadata.name && (
+                          <h3 className="text-base font-semibold text-white">
+                            {tokenMetadata.name}
+                          </h3>
+                        )}
+                        {tokenMetadata.symbol && (
+                          <span className="px-2 py-0.5 text-xs font-medium rounded-md bg-purple-500/20 text-purple-300 border border-purple-500/30 whitespace-nowrap">
+                            {tokenMetadata.symbol}
+                          </span>
+                        )}
+                        {additionalMetadata?.description && (
+                          <p className="text-sm text-slate-400">
+                            {additionalMetadata.description}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Mint button */}
               <button
