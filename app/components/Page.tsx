@@ -39,7 +39,6 @@ const Page = () => {
       }
 
       try {
-        // Fetch SPL Token-2022 metadata directly from the mint account
         const metadata = await getTokenMetadata(
           connection,
           MINT_ADDRESS,
@@ -74,7 +73,6 @@ const Page = () => {
   )[0];
 
   const handleMint = async () => {
-    // Ensure wallet and program are ready
     if (!publicKey || !program) return;
     setMinting(true);
     setTxHash(null);

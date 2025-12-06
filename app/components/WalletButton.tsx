@@ -1,13 +1,4 @@
 "use client";
-
-// import {
-//   Tooltip,
-//   TooltipContent,
-//   TooltipProvider,
-//   TooltipTrigger,
-// } from "@/components/ui/tooltip";
-
-import React from "react";
 import dynamic from "next/dynamic";
 
 // Nextjs hydration error fix
@@ -45,17 +36,8 @@ const WalletMultiButton = dynamic(
 
 export function WalletButton() {
   return (
-    // <TooltipProvider>
-    //   <Tooltip>
-    //     <TooltipTrigger asChild>
-          <div className="inline-block">
-            <WalletMultiButton />
-          </div>
-    //     </TooltipTrigger>
-    //     <TooltipContent>
-    //       <p>Devnet Only</p>
-    //     </TooltipContent>
-    //   </Tooltip>
-    // </TooltipProvider>
+    <div className="inline-block">
+      <WalletMultiButton />
+    </div>
   );
 }
